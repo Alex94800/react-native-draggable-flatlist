@@ -13,12 +13,12 @@ import {
   State as GestureState,
   FlatList,
   GestureHandlerGestureEventNativeEvent,
-  PanGestureHandlerEventExtra
+  PanGestureHandlerEventExtra, NativeViewGestureHandler
 } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 import { springFill, setupCell } from "./procs";
 
-const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
+const AnimatedFlatList = Animated.createAnimatedComponent(RNFlatList);
 
 const {
   Value,
@@ -889,18 +889,20 @@ class DraggableFlatList<T> extends React.Component<Props<T>, State> {
           onLayout={this.onContainerLayout}
           onTouchEnd={this.onContainerTouchEnd}
         >
-          <AnimatedFlatList
-            {...this.props}
-            CellRendererComponent={this.CellRendererComponent}
-            ref={this.flatlistRef}
-            onContentSizeChange={this.onListContentSizeChange}
-            scrollEnabled={!hoverComponent && scrollEnabled}
-            renderItem={this.renderItem}
-            extraData={this.state}
-            keyExtractor={this.keyExtractor}
-            onScroll={this.onScroll}
-            scrollEventThrottle={1}
-          />
+          <NativeViewGestureHandler ref={this.props.nativeHandler}>
+            <AnimatedFlatList
+              {...this.props}
+              CellRendererComponent={this.CellRendererComponent}
+              ref={this.flatlistRef}
+              onContentSizeChange={this.onListContentSizeChange}
+              scrollEnabled={!hoverComponent && scrollEnabled}
+              renderItem={this.renderItem}
+              extraData={this.state}
+              keyExtractor={this.keyExtractor}
+              onScroll={this.onScroll}
+              scrollEventThrottle={1}
+            />
+          </NativeViewGestureHandler>
           {!!hoverComponent && this.renderHoverComponent()}
           <Animated.Code>
             {() =>
