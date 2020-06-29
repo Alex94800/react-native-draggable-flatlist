@@ -880,6 +880,7 @@ class DraggableFlatList<T> extends React.Component<Props<T>, State> {
       <PanGestureHandler
         ref={this.panGestureHandlerRef}
         onGestureEvent={this.onPanGestureEvent}
+        simultaneousHandlers={this.props.nativeHandler}
         onHandlerStateChange={this.onPanStateChange}
         {...dynamicProps}
       >
@@ -889,7 +890,8 @@ class DraggableFlatList<T> extends React.Component<Props<T>, State> {
           onLayout={this.onContainerLayout}
           onTouchEnd={this.onContainerTouchEnd}
         >
-          <NativeViewGestureHandler ref={this.props.nativeHandler}>
+          <NativeViewGestureHandler ref={this.props.nativeHandler}
+                                    simultaneousHandlers={this.panGestureHandlerRef}>
             <AnimatedFlatList
               {...this.props}
               CellRendererComponent={this.CellRendererComponent}
