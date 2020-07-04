@@ -47,7 +47,7 @@ const {
   spring,
   defined,
   max,
-  debug
+  debug,
 } = Animated;
 
 // Fire onScrollComplete when within this many
@@ -658,34 +658,36 @@ class DraggableFlatList<T> extends React.Component<Props<T>, State> {
   );
 
   onScroll = event([
-    {
-      nativeEvent: ({ contentOffset }: NativeScrollEvent) =>
-        block([
-          set(
-            this.scrollOffset,
-            this.props.horizontal ? contentOffset.x : contentOffset.y
-          ),
-          cond(
-            and(
-              this.isAutoscrolling.native,
-              or(
-                lessOrEq(
-                  abs(sub(this.targetScrollOffset, this.scrollOffset)),
-                  scrollPositionTolerance
-                ),
-                this.isScrolledUp,
-                this.isScrolledDown
+      {
+        nativeEvent: ({ contentOffset }: NativeScrollEvent) =>
+            block([
+              set(
+                  this.scrollOffset,
+                  this.props.horizontal ? contentOffset.x : contentOffset.y
+              ),
+              cond(
+                  and(
+                      this.isAutoscrolling.native,
+                      or(
+                          lessOrEq(
+                              abs(sub(this.targetScrollOffset, this.scrollOffset)),
+                              scrollPositionTolerance
+                          ),
+                          this.isScrolledUp,
+                          this.isScrolledDown
+                      )
+                  ),
+                  [
+                    set(this.isAutoscrolling.native, 0),
+                    this.checkAutoscroll,
+                    call(this.autoscrollParams, this.onAutoscrollComplete)
+                  ]
               )
-            ),
-            [
-              set(this.isAutoscrolling.native, 0),
-              this.checkAutoscroll,
-              call(this.autoscrollParams, this.onAutoscrollComplete)
-            ]
-          )
-        ])
-    }
-  ]);
+            ])
+      }
+    ], {
+      listener: (event) => console.log(event)
+  });
 
   onGestureRelease = [
     cond(
@@ -731,7 +733,7 @@ class DraggableFlatList<T> extends React.Component<Props<T>, State> {
     }
   ]);
 
-  onPanGestureEvent = event([
+  onPanGestureEvent = Animated.event([
     {
       nativeEvent: ({ x, y }: PanGestureHandlerEventExtra) =>
         cond(
@@ -749,7 +751,9 @@ class DraggableFlatList<T> extends React.Component<Props<T>, State> {
           ]
         )
     }
-  ]);
+  ], {
+    listener: (event) => console.log(event)
+  });
 
   hoverComponentTranslate = cond(
     clockRunning(this.hoverClock),
@@ -891,6 +895,7 @@ class DraggableFlatList<T> extends React.Component<Props<T>, State> {
           onTouchEnd={this.onContainerTouchEnd}
         >
           <NativeViewGestureHandler ref={this.props.nativeHandler}
+                                    onHandlerStateChange={this.onStateChange}
                                     simultaneousHandlers={this.panGestureHandlerRef}>
             <AnimatedFlatList
               {...this.props}
